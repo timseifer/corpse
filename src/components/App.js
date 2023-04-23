@@ -65,7 +65,8 @@ class App extends Component {
       historyProdCount: 0,
       products_historical: '',
       vote_end: 0,
-      loading: true
+      loading: true,
+
     }
 
     this.createProduct = this.createProduct.bind(this)
@@ -78,7 +79,7 @@ class App extends Component {
   createProduct(name, price, upvotes, contributors) {
     this.setState({ loading: true })
     this.state.marketplace.methods.createProduct(name, price, upvotes, contributors).send({ from: this.state.account })
-    .once('receipt', (receipt) => {
+    .once('transactionHash', (transactionHash) => {
       this.setState({ loading: false })
     })
   }
@@ -86,7 +87,7 @@ class App extends Component {
   purchaseProduct(id, price) {
     this.setState({ loading: true })
     this.state.marketplace.methods.purchaseProduct(id).send({ from: this.state.account, value: price, gasLimit: 5000000})
-    .once('receipt', (receipt) => {
+    .once('transactionHash', (transactionHash) => {
       this.setState({ loading: false })
     })
   }
@@ -94,15 +95,16 @@ class App extends Component {
   createVoteEnd() {
     this.setState({ loading: true })
     this.state.marketplace.methods.createVoteEnd().send({ from: this.state.account })
-    .once('receipt', (receipt) => {
+    .once('transactionHash', (transactionHash) => {
     this.setState({ loading: false })
     })
     console.log(this.state.marketplace.methods.getCurrentVote())
     //document.getElementById('vote').innerHTML = ""+this.marketplace.vote_end() + ""
   }
 
-  getArr(id) {
-    this.state.marketplace.methods.getArr(id)
+  async getArr(id) {
+    let myArr = await this.state.marketplace.methods.getArr(id).call();
+    return myArr
   }
 
   increaseVotes(){
@@ -113,6 +115,7 @@ class App extends Component {
   getCurrentVote(){
     return this.state.marketplace.methods.getCurrentVote()
   }
+
 
 
 

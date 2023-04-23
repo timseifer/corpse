@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.8.0;
 
 contract Marketplace {
 	string public name;
@@ -13,20 +13,20 @@ contract Marketplace {
 		uint id;
 		string name;
 		uint price;
-		address payable owner;
+		address owner;
 		bool purchased;
 		uint upvotes;
-		uint[5] contributors;
+		string[5] contributors;
 	}
 
 	event ProductCreated(
 		uint id,
 		string name,
 		uint price,
-		address payable owner,
+		address owner,
 		bool purchased,
 		uint upvotes,
-		uint[5] contributors	
+		string[5] contributors	
 	);
 
 	event upVote(
@@ -37,10 +37,10 @@ contract Marketplace {
 		uint id,
 		string name,
 		uint price,
-		address payable owner,
+		address owner,
 		bool purchased,
 		uint upvotes,
-		uint[5] contributors
+		string[5] contributors
 	);
 
 	struct voteEnd{
@@ -48,18 +48,18 @@ contract Marketplace {
 	}
 	
 
-	constructor() public {
-		name = "invictus words";
+	constructor() {
+		name = "exquisite corpse";
 		products_historical ='';
 		vote_end = 0;
 	}
 
-	function getArr(uint _id) public view returns (string memory) {
-		Product memory _product = products[_id];	
-    	return toString(_product.contributors[0]);
+	function getArr(uint _id) public view returns (string[5] memory) {
+		Product storage myProduct = products[_id];
+    	return myProduct.contributors;
 	}
 
-	function strConcat(string memory _a, string memory _b, string memory _c, string memory _d, string memory _e) internal returns (string memory){
+	function strConcat(string memory _a, string memory _b, string memory _c, string memory _d, string memory _e) internal pure returns (string memory){
     bytes memory _ba = bytes(_a);
     bytes memory _bb = bytes(_b);
     bytes memory _bc = bytes(_c);
@@ -77,7 +77,7 @@ contract Marketplace {
     return string(babcde);
 	}
 
-	function strConcat(string memory _a, string memory _b) internal returns (string memory) {
+	function strConcat(string memory _a, string memory _b) internal pure returns (string memory) {
     return strConcat(_a, _b, "", "", "");
 }
 
@@ -102,6 +102,19 @@ contract Marketplace {
         }
         return string(bstr);
     }
+	function addressToString(address _addr) public pure returns (string memory) {
+		bytes32 value = bytes32(uint256(uint160(_addr)));
+		bytes memory alphabet = "0123456789abcdef";
+
+		bytes memory str = new bytes(42);
+		str[0] = '0';
+		str[1] = 'x';
+		for (uint i = 0; i < 20; i++) {
+			str[2+i*2] = alphabet[uint8(value[i + 12] >> 4)];
+			str[3+i*2] = alphabet[uint8(value[i + 12] & 0x0f)];
+		}
+		return string(str);
+	}
 
 	function createVoteEnd() public {
 		vote_end++;
@@ -111,7 +124,7 @@ contract Marketplace {
 				_product = products[i];
 				if(_product.upvotes >= 2){
 						historyProdCount++;
-						products_historical = strConcat(products_historical, products[i].name);
+						products_historical = strConcat(products_historical, strConcat(products[i].name, " "));
 				}
 			}
 			products_historical = strConcat(products_historical, "\n\n");
@@ -151,7 +164,7 @@ contract Marketplace {
 	}
 
 
-	function createProduct(string memory _name, uint _price, uint upvotes, uint[5] memory contributors) public {
+	function createProduct(string memory _name, uint _price, uint upvotes, string[5] memory contributors) public {
 		// require a name
 		require(bytes(_name).length > 0);
 		// require a valid price
@@ -160,7 +173,7 @@ contract Marketplace {
 		// inc products count
 		productCount++;
 		//add owner to contributors
-		contributors[upvotes] = uint256(uint160(msg.sender));
+		contributors[upvotes] = addressToString(msg.sender);
 		// create the product
 		products[productCount] = Product(productCount, _name, _price, msg.sender, false, upvotes, contributors);
 		// trigger an event	
@@ -171,7 +184,7 @@ contract Marketplace {
 		// fetch product
 		Product memory _product = products[_id];	
 		// fetch the owner
-		address payable _seller = _product.owner;
+		address _seller = _product.owner;
 		// make sure the product has a valid id
 		require(_product.id > 0 && _product.id <= productCount);
 		// make sure they sent enough ether
@@ -181,7 +194,7 @@ contract Marketplace {
 		// require that the buyer is not the seller
 		require(_seller != msg.sender);
 		// require that the buyer is not a previous contributor (i.e already upvoted)
-
+		
 
 		// purchase it -> transfer ownership to buyer
 		_product.owner = msg.sender;
@@ -190,11 +203,11 @@ contract Marketplace {
 		// increment upvotes of product
 		_product.upvotes += 1;
 		//add purchaser to contributors
-		_product.contributors[_product.upvotes] = uint256(uint160(_product.owner));
+		_product.contributors[_product.upvotes] = addressToString(msg.sender);
 		//update the product
 		products[_id] = _product;
 		// pay the seller by sending them ether
-		address(_seller).transfer(msg.value);
+		// address(_seller).transfer(msg.value);
 		// trigger an event
 		emit ProductPurchased(productCount, _product.name, _product.price, msg.sender, true, _product.upvotes, _product.contributors);
 

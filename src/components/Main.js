@@ -2,20 +2,49 @@ import React, { Component } from 'react';
 import './App.css';
 import Entry from './Entry'
 import './typewriter.css'
+import './Skull.css'
 
 class Main extends Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      myArrContent: []
+    }
+  }
+
 
   render() {
     return (
 <div id="content" className="content">
-        <h1 className='typewriter'>Add a Sentence</h1>
+  <h1>
+  Exquisite Corpse
+  </h1>
+<br>
+  </br>
+  <br>
+  </br>
+<div class="container">
+<div class="skull">
+		<div class="head">
+			<div class="crack"></div>
+		</div>
+		<div class="mouth">
+			<div class="teeth"></div>
+		</div>
+	</div>
+  </div>
+  <br>
+  </br>
+  <br>
+  </br>
+        <h2>Add a Sentence</h2>
         <form onSubmit={(event) => {
           event.preventDefault()
           const name = this.productName.value
           const price = window.web3.utils.toWei("0.000005", 'Ether')
-          var my_val = [1, 2, 3, 4, 5]
+          var my_val = ['', '', '', '', ''];
           this.props.createProduct(name, price, 0, my_val)
-          console.log(this.props)
         }}>
           <div className="form-group mr-sm-2">
             <input
@@ -50,11 +79,15 @@ class Main extends Component {
             </tr>
           </thead>
           <tbody id="productList">
-            { this.props.products.map((product, key) => {
-              return(
-                !product.purchased ? <Entry key={key} product={product} purchaseProduct ={this.props.purchaseProduct} getArr ={this.props.getArr}/> : null
-              )
-            })}
+          { this.props.products.map((product, key) => {  
+            	this.props.getArr(product.id.toNumber());         
+              if (!product.purchased) {
+                return <Entry key={key} product={product} name={product.name} upvotes={product.upvotes} purchaseProduct ={this.props.purchaseProduct} getArr ={this.props.getArr} data={this.state.myArrContent}/>;
+              } else {
+                return null;
+              }
+
+          })}
           </tbody>
         </table>
         <h2>
@@ -89,8 +122,14 @@ class Main extends Component {
        <h2>
           Past Stories
         </h2>
-
        <div  ref="setter" className="sentence" dangerouslySetInnerHTML={{ __html: this.props.historicalProducts}}></div>
+       <br>
+       </br>
+       <br>
+       </br>
+       <div>
+    Beta V1.0, UEP Lab Tufts University
+  </div>
       </div>
     );
   }

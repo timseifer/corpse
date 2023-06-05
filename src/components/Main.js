@@ -64,7 +64,9 @@ class Main extends Component {
           Once a sentence, reaches 5 upvotes the word can no longer be purchased.
           The people who bought the sentence are listed as contributors to the story. Once
           the story reaches 10 sentences it is minted as its own contract available for purchase.
-          The contributors are then sent an equal proportion of the sale of the story.
+          The contributors are then sent an equal proportion of the sale of the story. You can see for each
+          sentence a historical log of every person who interacted with the sentence through upvoting. The
+          first contributor is always the person who made the original sentence.
         </div>
         <h2>Buy Sentence</h2>
         <table className="table">
